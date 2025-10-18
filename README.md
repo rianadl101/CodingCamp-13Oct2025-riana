@@ -1,2 +1,2 @@
-# CodingCamp-13Oct2025-riana
-Mini Project 13 Oktober 2025
+# CodingCamp Batch 13 Oct 2025
+Mini Project Software Engineering
