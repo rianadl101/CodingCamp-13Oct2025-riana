@@ -5,7 +5,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const todoList = document.getElementById('todo-list');
     const taskError = document.getElementById('task-error');
     const dateError = document.getElementById('date-error');
-    const filterBtns = document.querySelectorAll('.filter-btn');
+    const filterButton = document.getElementById('filter-button');
+    const filterMenu = document.getElementById('filter-menu');
+    const filterOptions = document.querySelectorAll('.filter-option');
+    const deleteAllButton = document.getElementById('delete-all-button');
 
     let todos = [];
     let currentFilter = 'all';
@@ -13,6 +16,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
     dateInput.setAttribute('min', today);
+
+    // Filter dropdown toggle
+    filterButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        filterMenu.classList.toggle('show');
+    });
+
+    // Close filter menu when clicking outside
+    document.addEventListener('click', function() {
+        filterMenu.classList.remove('show');
+    });
+
+    filterMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
 
     // Add button click event
     addButton.addEventListener('click', function() {
@@ -38,6 +56,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Delete all button
+    deleteAllButton.addEventListener('click', function() {
+        if (todos.length > 0) {
+            if (confirm('Are you sure you want to delete all tasks?')) {
+                todos = [];
+                renderTodos();
+            }
+        }
+    });
+
     // Validate form
     function validateForm() {
         let isValid = true;
@@ -47,16 +75,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // Validate task input
         const taskValue = todoInput.value.trim();
         if (taskValue.length === 0) {
-            taskError.textContent = 'Task cannot be empty';
+            taskError.textContent = '⚠ Task cannot be empty';
             isValid = false;
         } else if (taskValue.length < 3) {
-            taskError.textContent = 'Task must be at least 3 characters';
+            taskError.textContent = '⚠ Task must be at least 3 characters';
             isValid = false;
         }
 
         // Validate date
         if (!dateInput.value) {
-            dateError.textContent = 'Please select a date';
+            dateError.textContent = '⚠ Please select a date';
             isValid = false;
         } else {
             const selectedDate = new Date(dateInput.value);
@@ -64,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
             currentDate.setHours(0, 0, 0, 0);
 
             if (selectedDate < currentDate) {
-                dateError.textContent = 'Date cannot be in the past';
+                dateError.textContent = '⚠ Date cannot be in the past';
                 isValid = false;
             }
         }
@@ -94,29 +122,34 @@ document.addEventListener('DOMContentLoaded', function() {
         const filteredTodos = filterTodos();
 
         if (filteredTodos.length === 0) {
-            todoList.innerHTML = '<li class="empty-state">No tasks found for this filter!</li>';
+            todoList.innerHTML = '<tr class="empty-state"><td colspan="4">No task found</td></tr>';
             return;
         }
 
         todoList.innerHTML = filteredTodos.map(todo => {
-            const dateClass = getDateClass(todo.date);
-            const dateLabel = getDateLabel(todo.date);
+            const status = getStatus(todo);
+            const statusClass = getStatusClass(status);
 
             return `
-                <li class="todo-item ${todo.completed ? 'completed' : ''}">
-                    <div class="todo-date ${dateClass}">${dateLabel}</div>
-                    <div class="todo-content">
-                        <div class="todo-text">${escapeHtml(todo.text)}</div>
-                        <div class="todo-actions">
-                            <button class="btn-complete" onclick="toggleComplete(${todo.id})">
-                                ${todo.completed ? '↶ Undo' : '✓'}
+                <tr>
+                    <td>
+                        <span class="task-text ${todo.completed ? 'completed' : ''}">${escapeHtml(todo.text)}</span>
+                    </td>
+                    <td>${formatDate(todo.date)}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${status}</span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-action btn-complete" onclick="toggleComplete(${todo.id})">
+                                ${todo.completed ? 'Undo' : 'Done'}
                             </button>
-                            <button class="btn-delete" onclick="deleteTodo(${todo.id})">
-                                🗑
+                            <button class="btn-action btn-delete" onclick="deleteTodo(${todo.id})">
+                                Delete
                             </button>
                         </div>
-                    </div>
-                </li>
+                    </td>
+                </tr>
             `;
         }).join('');
     }
@@ -128,32 +161,31 @@ document.addEventListener('DOMContentLoaded', function() {
         return div.innerHTML;
     }
 
-    // Get date class
-    function getDateClass(dateString) {
-        const todoDate = new Date(dateString);
+    // Get status
+    function getStatus(todo) {
+        if (todo.completed) return 'Completed';
+        
+        const todoDate = new Date(todo.date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         todoDate.setHours(0, 0, 0, 0);
 
-        if (todoDate < today) return 'overdue';
-        if (todoDate.getTime() === today.getTime()) return 'today';
-        return '';
+        if (todoDate < today) return 'Overdue';
+        return 'Pending';
     }
 
-    // Get date label
-    function getDateLabel(dateString) {
-        const todoDate = new Date(dateString);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        todoDate.setHours(0, 0, 0, 0);
+    // Get status class
+    function getStatusClass(status) {
+        if (status === 'Completed') return 'status-completed';
+        if (status === 'Overdue') return 'status-overdue';
+        return 'status-pending';
+    }
 
-        const diffTime = todoDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays < 0) return `Overdue (${dateString})`;
-        if (diffDays === 0) return 'Today';
-        if (diffDays === 1) return 'Tomorrow';
-        return dateString;
+    // Format date
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const options = { year: 'numeric', month: 'short', day: 'numeric' };
+        return date.toLocaleDateString('en-US', options);
     }
 
     // Filter todos
@@ -178,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return todos.filter(todo => {
                     const todoDate = new Date(todo.date);
                     todoDate.setHours(0, 0, 0, 0);
-                    return todoDate < today;
+                    return todoDate < today && !todo.completed;
                 });
             default:
                 return todos;
@@ -196,16 +228,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Delete todo
     window.deleteTodo = function(id) {
-        todos = todos.filter(t => t.id !== id);
-        renderTodos();
+        if (confirm('Are you sure you want to delete this task?')) {
+            todos = todos.filter(t => t.id !== id);
+            renderTodos();
+        }
     };
 
-    // Filter buttons
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            filterBtns.forEach(b => b.classList.remove('active'));
+    // Filter options
+    filterOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            filterOptions.forEach(opt => opt.classList.remove('active'));
             this.classList.add('active');
             currentFilter = this.dataset.filter;
+            filterButton.textContent = 'FILTER: ' + this.textContent.toUpperCase();
+            filterMenu.classList.remove('show');
             renderTodos();
         });
     });

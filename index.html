@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width-device-width, initial-scale-1.0">
-    <title>Todo List - Riana</title>
+    <title>Todo List Web APP - Riana</title>
 
     <!-- CSS external file -->
     <link rel="stylesheet" href="css\style.css">
@@ -16,7 +16,7 @@
     <!-- Header section -->
     <header>
         <h1>My Todo List</h1>
-        <p class="subtitle">Stay organized and productive</p>
+        <p class="subtitle">Stay productive!!</p>
     </header>
 
     <!-- main con section  -->
@@ -25,26 +25,55 @@
 
         <!-- input form section -->
          <div class="input-section">
-                <div class="form-group">
-                    <label for="todo-input">Task Description</label>
-        <input type="text" id="todo-input" placeholder="Add a new task.."/>
-        <span class="error-message" id="date-error"></span>
-        </div>
-        
+                
+        <input type="text" id="todo-input" placeholder="Add a new task.." required/>
+        <input type="date" id="date-input" placeholder="mm/dd/yyyy" required/>
         <button id="add-button">Add Task</button>
+        </div>
+
+        <div class="error-messages">
+                <span class="error-message" id="task-error"></span>
+                <span class="error-message" id="date-error"></span>
+            </div>
         
-        <!-- Filter Section -->
-            <div class="filter-section">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="today">Today</button>
-                <button class="filter-btn" data-filter="upcoming">Upcoming</button>
-                <button class="filter-btn" data-filter="overdue">Overdue</button>
+        <!-- Filter and delete all Section -->
+            <div class="controls-section">
+                <div class="filter-dropdown">
+                    <button id="filter-button">FILTER</button>
+                    <div class="filter-menu" id="filter-menu">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="today">Today</button>
+                        <button class="filter-btn" data-filter="upcoming">Upcoming</button>
+                        <button class="filter-btn" data-filter="overdue">Overdue</button>
+                    </div>
+            
+            <button id="delete-all-button">DELETE ALL</button>
             </div>
 
         <!-- Todo list display -->
-        <ul id="todo-list">
+        <!-- <ul id="todo-list">
             <li class="empty-state">No tasks yet. Add one to get started!</li>
-        </ul>
+        </ul> -->
+
+        <!-- Table Header -->
+            <div class="table-container">
+                <table id="todo-table">
+                    <thead>
+                        <tr>
+                            <th>TASK</th>
+                            <th>DUE DATE</th>
+                            <th>STATUS</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="todo-list">
+                        <tr class="empty-state">
+                            <td colspan="4">No task found</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        
        </section> 
     </main>
 
