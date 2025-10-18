@@ -16,14 +16,35 @@
     <!-- Header section -->
     <header>
         <h1>My Todo List</h1>
+        <p class="subtitle">Stay organized and productive</p>
     </header>
 
     <!-- main con section  -->
     <main>
        <section class="todo-app">
+
+        <!-- input form section -->
+         <div class="input-section">
+                <div class="form-group">
+                    <label for="todo-input">Task Description</label>
         <input type="text" id="todo-input" placeholder="Add a new task.."/>
-        <button id="add-button">Add</button>
-        <ul id="rodo-list"></ul>
+        <span class="error-message" id="date-error"></span>
+        </div>
+        
+        <button id="add-button">Add Task</button>
+        
+        <!-- Filter Section -->
+            <div class="filter-section">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="today">Today</button>
+                <button class="filter-btn" data-filter="upcoming">Upcoming</button>
+                <button class="filter-btn" data-filter="overdue">Overdue</button>
+            </div>
+
+        <!-- Todo list display -->
+        <ul id="todo-list">
+            <li class="empty-state">No tasks yet. Add one to get started!</li>
+        </ul>
        </section> 
     </main>
 
